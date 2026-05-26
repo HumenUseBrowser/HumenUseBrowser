@@ -15,7 +15,6 @@ def print(*args, **kwargs):
     _orig_print(*args, **kwargs)
 from config import (
     DEEPSEEK_API_KEY, DEEPSEEK_BASE_URL, DEEPSEEK_MODEL,
-    DEFAULT_PHONE, DEFAULT_PASSWORD,
     MAX_ACTIONS_PER_STEP, MAX_HISTORY_MESSAGES, MAX_ACTION_LOOP,
     PAGE_LOAD_WAIT_MS,
 )
@@ -46,13 +45,13 @@ Rules:
 - You are already on Bing. Your FIRST action should be to type a search query.
 - Generate smart search keywords based on what the user wants.
 - Use the selector or alt value from the snapshot as the selector.
-- Use these default credentials when login is needed: phone {DEFAULT_PHONE}, password {DEFAULT_PASSWORD}
 - Maximum {MAX_ACTIONS_PER_STEP} actions per response
 - Use scroll actions when you need to see more page content
 - Always end with a "done" action when the task is complete
 - If a previous action failed, try a different selector or approach
 - Read the page snapshot carefully to find the correct selectors for elements
 - If the user provides an explicit URL, navigate to it directly with a navigate action
+- When login is required, ask the user for credentials
 ]"""
 
 
@@ -158,7 +157,7 @@ def run_agent():
     print("  Powered by MiMo v2.5 Pro + CloakBrowser")
     print("=" * 60)
 
-    # Command line mode: python ai_agent.py "帮我登录超星学习通"
+    # Command line mode: python ai_agent.py "帮我搜索 Python 教程"
     if len(sys.argv) > 1:
         instruction = " ".join(sys.argv[1:])
         print(f"\n  Instruction: {instruction}")

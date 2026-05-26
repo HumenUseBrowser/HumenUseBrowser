@@ -1,11 +1,7 @@
-# AI API 配置
+# AI 模型配置（必填）
 DEEPSEEK_API_KEY = "tp-suggudkwp6wmdu7649j27c9h5edykg8k45kwnib9h9i1y9wu"
 DEEPSEEK_BASE_URL = "https://token-plan-sgp.xiaomimimo.com/v1"
 DEEPSEEK_MODEL = "mimo-v2.5-pro"
-
-# 默认账号（AI 会根据用户指令自动判断登录地址和平台）
-DEFAULT_PHONE = "18878103869"
-DEFAULT_PASSWORD = "Ln1433223"
 
 # 浏览器设置
 BROWSER_HEADLESS = False

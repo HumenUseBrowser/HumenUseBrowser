@@ -10,43 +10,6 @@ AI 驱动的浏览器自动化工具。一句话指令，AI 自动分析页面�
 
 - **[Playwright](https://github.com/microsoft/playwright)** — 微软开源的浏览器自动化框架，支持 Chromium、Firefox、WebKit 三大引擎。本项目基于 Playwright 的页面操作能力（点击、输入、滚动、提取）和 v1.60.0 新增的 Tracing/HAR 录制功能构建。
 
-## Playwright v1.60.0 新功能
-
-本项目充分利用了 Playwright v1.60.0（2025 年 5 月 11 日发布）的关键新特性：
-
-### HAR 录制与 Tracing 深度集成
-
-`tracing.startHar()` / `tracing.stopHar()` 将 HAR 录制作为一等公民的 Tracing API，同时记录操作轨迹、截图、DOM 快照和网络请求：
-
-```python
-context.tracing.start(har_path="trace.har", screenshots=True, snapshots=True)
-page.goto("https://example.com")
-context.tracing.stop(path="trace.har")
-# trace.har 包含 HAR + 操作轨迹 + 截图，可直接拖入 DevTools 回放
-```
-
-### Drop API
-
-`locator.drop()` 模拟外部文件拖拽上传，适用于测试拖拽上传区域：
-
-```python
-await page.locator('#dropzone').drop({
-    files: {'name': 'note.txt', 'mimeType': 'text/plain', 'buffer': Buffer.from('hello')}
-})
-```
-
-### Aria Snapshots 增强
-
-- `expect(page).toMatchAriaSnapshot()` 现可直接在 Page 上使用
-- `locator.ariaSnapshot()` 新增 `boxes` 选项，输出每个元素的边界框坐标 `[box=x,y,width,height]`，专为 AI 消费设计
-
-### 其他重要更新
-
-- `test.abort()` — 从 fixture/hook 中中止测试
-- `locator.highlight()` 新增 `style` 选项，可自定义高亮样式
-- `browser.on('context')` 事件 — 监听新上下文创建
-- HTML reporter 支持直接打开 `.zip` 文件
-
 ## 架构
 
 ```
@@ -55,22 +18,20 @@ await page.locator('#dropzone').drop({
 
 ## 核心特性
 
-- **一句话驱动** — 只需说"帮我登录超星学习通"，AI 自动完成全部操作
+- **一句话驱动** — 只需说"帮我搜索 Python 教程"，AI 自动完成全部操作
 - **探索式搜索** — 从必应开始，AI 自动生成搜索词，逐步找到目标
 - **视觉标注** — 操作时红色线框标注目标元素，实时可见
 - **隐身浏览器** — CloakBrowser 反检测，绕过指纹识别
 - **错误自愈** — 选择器失败时 AI 自动切换方案重试
-- **HAR + Trace 录制** — 基于 Playwright 1.60.0 的 tracing.startHar()，一份文件包含操作轨迹、网络请求、截图和 DOM 快照
 
 ## 文件结构
 
 ```
-├── config.py              # 配置中心（API Key、账号密码、参数）
+├── config.py              # 配置中心（AI 模型配置、浏览器参数）
 ├── browser_engine.py      # 浏览器引擎（CloakBrowser + Playwright Tracing 封装）
 ├── page_analyzer.py       # 页面快照提取（DOM → AI 可读文本）
 ├── action_executor.py     # 动作执行器（click/type/navigate/scroll + 视觉标注）
 ├── ai_agent.py            # 主入口（AI 对话 + 动作循环）
-├── record_har.py          # HAR 网络录制工具（基于 tracing.startHar()）
 └── requirements.txt       # 依赖清单
 ```
 
@@ -78,6 +39,7 @@ await page.locator('#dropzone').drop({
 
 ```bash
 pip install -r requirements.txt
+playwright install chromium
 ```
 
 依赖：
@@ -87,15 +49,12 @@ pip install -r requirements.txt
 
 ## 配置
 
-编辑 `config.py`：
+编辑 `config.py`，填入你的 AI 模型配置：
 
 ```python
 DEEPSEEK_API_KEY = "your-api-key"
 DEEPSEEK_BASE_URL = "https://api.deepseek.com"
 DEEPSEEK_MODEL = "deepseek-chat"
-
-DEFAULT_PHONE = "your-phone"
-DEFAULT_PASSWORD = "your-password"
 ```
 
 ## 使用
@@ -103,8 +62,8 @@ DEFAULT_PASSWORD = "your-password"
 ### 命令行模式
 
 ```bash
-python ai_agent.py "帮我登录超星学习通"
-python ai_agent.py "帮我找GitHub今天最热门的项目"
+python ai_agent.py "帮我搜索 Python 教程"
+python ai_agent.py "帮我找 GitHub 今天最热门的项目"
 python ai_agent.py "帮我查一下今天的天气"
 ```
 
@@ -112,17 +71,9 @@ python ai_agent.py "帮我查一下今天的天气"
 
 ```bash
 python ai_agent.py
->>> 帮我登录超星学习通
->>> 查看我的课程
+>>> 帮我搜索 Python 教程
+>>> 点击第一个搜索结果
 >>> quit
-```
-
-### HAR 录制
-
-```bash
-python record_har.py
-# 生成 trace.har，包含 HAR + 操作轨迹 + 截图
-# 用 npx playwright show-trace trace.har 查看
 ```
 
 ## 支持的 AI 模型
@@ -148,10 +99,10 @@ python record_har.py
 
 ```json
 {"action": "click", "selector": "#loginBtn"}
-{"action": "type", "selector": "input[name=\"phone\"]", "value": "18878103869"}
+{"action": "type", "selector": "input[name=\"search\"]", "value": "Python 教程"}
 {"action": "navigate", "url": "https://github.com/trending"}
 {"action": "scroll", "direction": "down", "amount": "page"}
-{"action": "extract", "selector": ".course-list", "description": "课程列表"}
+{"action": "extract", "selector": ".search-results", "description": "搜索结果"}
 {"action": "wait", "ms": 3000}
 {"action": "done", "summary": "任务完成"}
 ```
